@@ -20,7 +20,7 @@
   <div class="container py-5">
     <h1 class="text-center mb-4">🎥 Predict Your Movie's Success</h1>
     <form id="movieForm" class="bg-white p-5 rounded shadow">
-
+      
       <!-- 🎬 Section 1: Commercial Success -->
       <h2>🎬 Commercial Success</h2>
       <div class="row mb-3">
@@ -30,10 +30,9 @@
         </div>
         <div class="col-md-6">
           <label class="form-label">Genre</label>
-          <input type="text" name="genre" class="form-control" placeholder="e.g. Action, Sci-Fi" required>
+          <input type="text" name="genre" class="form-control" placeholder="e.g. Action, Sci‑Fi" required>
         </div>
       </div>
-
       <div class="row mb-3">
         <div class="col-md-6">
           <label class="form-label">Lead Actors</label>
@@ -44,7 +43,6 @@
           <input type="text" name="director" class="form-control" required>
         </div>
       </div>
-
       <div class="row mb-3">
         <div class="col-md-4">
           <label class="form-label">Franchise</label>
@@ -60,13 +58,12 @@
         </div>
         <div class="col-md-4">
           <label class="form-label">Competing Releases</label>
-          <input type="text" name="competition" class="form-control" placeholder="e.g. Dune 2, Barbie">
+          <input type="text" name="competition" class="form-control" placeholder="e.g. Dune 2, Barbie">
         </div>
       </div>
-
       <div class="row mb-3">
         <div class="col-md-6">
-          <label class="form-label">Trailer Views (within 48h)</label>
+          <label class="form-label">Trailer Views (48 hr)</label>
           <input type="number" name="trailer_views" class="form-control">
         </div>
         <div class="col-md-6">
@@ -74,15 +71,17 @@
           <input type="text" name="studio" class="form-control">
         </div>
       </div>
-
-      <div class="mb-4">
+      <div class="mb-3">
         <label class="form-label">Countries Releasing In</label>
         <input type="text" name="release_countries" class="form-control" placeholder="e.g. USA, UK, India">
       </div>
-
+      <div class="mb-4">
+        <label class="form-label">Opening Weekend Gross</label>
+        <input type="text" name="opening_weekend_gross" class="form-control" placeholder="e.g. $7,061,513" required>
+      </div>
+      
       <!-- 🎭 Section 2: Critical Reception -->
       <h2>🎭 Critical Reception</h2>
-
       <div class="row mb-3">
         <div class="col-md-6">
           <label class="form-label">MPA Rating</label>
@@ -90,9 +89,9 @@
             <option value="">Select</option>
             <option>G</option>
             <option>PG</option>
-            <option>PG-13</option>
+            <option>PG‑13</option>
             <option>R</option>
-            <option>NC-17</option>
+            <option>NC‑17</option>
             <option>NR</option>
           </select>
         </div>
@@ -101,18 +100,16 @@
           <input type="number" step="0.1" min="0" max="10" name="rating" class="form-control" placeholder="e.g. 8.3" required>
         </div>
       </div>
-
       <div class="row mb-3">
         <div class="col-md-6">
-          <label class="form-label">Director's Past Avg. Rating (%)</label>
-          <input type="number" name="director_rating" class="form-control" placeholder="e.g. 82">
+          <label class="form-label">Director's Past Avg. Rating</label>
+          <input type="number" name="director_avg_meta" class="form-control" placeholder="e.g. 82 (from Metacritic)">
         </div>
         <div class="col-md-6">
           <label class="form-label">Screenwriter</label>
           <input type="text" name="screenwriter" class="form-control">
         </div>
       </div>
-
       <div class="row mb-3">
         <div class="col-md-4">
           <label class="form-label">Originality</label>
@@ -123,28 +120,33 @@
           </select>
         </div>
         <div class="col-md-4">
-          <label class="form-label">Runtime</label>
-          <input type="text" name="runtime" class="form-control" placeholder="e.g. 2h 40min">
+          <label class="form-label">Duration (min)</label>
+          <input type="number" name="duration" class="form-control" placeholder="e.g. 145">
         </div>
         <div class="col-md-4">
           <label class="form-label">Script Sentiment</label>
-          <input type="text" name="script_sentiment" class="form-control" placeholder="e.g. Positive, High reading level">
+          <input type="text" name="script_sentiment" class="form-control" placeholder="e.g. Positive">
         </div>
       </div>
-
-      <div class="mb-4">
-        <label class="form-label">Trailer Sentiment (YouTube/Twitter)</label>
+      <div class="mb-3">
+        <label class="form-label">Trailer Sentiment (%)</label>
         <input type="text" name="trailer_sentiment" class="form-control" placeholder="e.g. 80% positive">
       </div>
-
-      <div class="mb-4">
+      <div class="mb-3">
+        <label class="form-label">Votes (IMDb)</label>
+        <input type="number" name="votes" class="form-control" placeholder="e.g. 500000">
+      </div>
+      <div class="mb-3">
         <label class="form-label">Festival Buzz</label>
         <input type="text" name="festival_buzz" class="form-control" placeholder="e.g. TIFF, Cannes">
       </div>
-
+      <div class="mb-4">
+        <label class="form-label">Metacritic Score (0–100)</label>
+        <input type="number" name="meta_score" step="0.1" min="0" max="100" class="form-control" placeholder="e.g. 87.0" required>
+      </div>
+      
       <!-- 🏆 Section 3: Awards Potential -->
       <h2>🏆 Awards Potential</h2>
-
       <div class="row mb-3">
         <div class="col-md-4">
           <label class="form-label">Similar Films Won in Past?</label>
@@ -155,7 +157,7 @@
           </select>
         </div>
         <div class="col-md-4">
-          <label class="form-label">Is It in Awards Season?</label>
+          <label class="form-label">In Awards Season?</label>
           <select name="awards_season" class="form-select">
             <option value="">Select</option>
             <option>Yes</option>
@@ -164,10 +166,9 @@
         </div>
         <div class="col-md-4">
           <label class="form-label">Cast Awards History</label>
-          <input type="text" name="acting_caliber" class="form-control" placeholder="e.g. 3x nominee">
+          <input type="text" name="acting_caliber" class="form-control" placeholder="e.g. 3× nominee">
         </div>
       </div>
-
       <div class="row mb-3">
         <div class="col-md-6">
           <label class="form-label">Director Awards History</label>
@@ -178,37 +179,37 @@
           <input type="text" name="category_strength" class="form-control" placeholder="e.g. Editing, VFX">
         </div>
       </div>
-
       <div class="mb-3">
-        <label class="form-label">Festival Reception (Ovations, Press)</label>
-        <input type="text" name="festival_reception" class="form-control" placeholder="e.g. 7 min ovation at Cannes">
+        <label class="form-label">Festival Reception</label>
+        <input type="text" name="festival_reception" class="form-control" placeholder="e.g. 7 min ovation">
       </div>
-
       <div class="mb-3">
         <label class="form-label">Review Consensus</label>
         <input type="text" name="review_scores" class="form-control" placeholder="e.g. 94% RT, 8.7 IMDb">
       </div>
-
       <div class="mb-4">
         <label class="form-label">Representation / Themes</label>
-        <input type="text" name="representation" class="form-control" placeholder="e.g. Yes (diverse cast, social themes)">
+        <input type="text" name="representation" class="form-control" placeholder="e.g. Diverse cast">
       </div>
-
       <div class="mb-4">
         <label class="form-label">Competing Award Films</label>
-        <input type="text" name="award_competition" class="form-control" placeholder="e.g. Dune 2, Scorsese film">
+        <input type="text" name="award_competition" class="form-control" placeholder="e.g. Dune 2, Scorsese">
       </div>
+      <div class="mb-4">
+        <label class="form-label">Nominations</label>
+        <input type="text" name="nominations" class="form-control" placeholder="e.g. 1, 2">
+      </div>
+      <!-- 📦 Raw Metadata -->
 
-      <!-- Submit Button -->
+      
+      <!-- Submit -->
       <div class="text-center mt-4">
         <button type="submit" class="btn btn-primary px-4 py-2">Submit for Prediction</button>
       </div>
     </form>
   </div>
 
-  <!-- Prediction result container -->
   <div id="predictionResult" class="container mt-4 d-none"></div>
-
   <script src="script/app.js" defer></script>
-</body>
+ </body>
 </html>

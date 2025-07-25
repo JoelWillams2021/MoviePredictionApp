@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p><strong>Box Office:</strong> $${Number(data.predicted_box_office).toLocaleString()}</p>
             <p><strong>Critic Score:</strong> ${Number(data.predicted_critic_score).toFixed(1)}%</p>
             <p><strong>Oscar Wins:</strong> ${data.predicted_oscar_wins}</p>
+            <p><strong>Final Verdict</strong> ${data.verdict}</p>
           </div>
         </div>
       `;

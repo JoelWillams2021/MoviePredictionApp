@@ -37,10 +37,12 @@ def predict():
         'release_month'
     ]
     critic_features = [
+        'budget',
+        'opening_weekend_gross',
+        'duration',
         'rating',
         'votes',
-        'budget',
-        'duration',
+        'director_avg_meta',
         'MPA',
         'primary_genre',
         'release_month'
@@ -65,11 +67,17 @@ def predict():
     critic_pred = critic_model.predict(df[critic_features])[0]
     oscar_pred  = oscar_model.predict(df[oscar_features])[0]
 
-    # 4) RETURN JSON
+    budget = float(data.get('budget', 0))
+    if box_pred >= 3 * budget and critic_pred >= 70:
+        verdict = "👍 Strong buy – this looks like a safe investment."
+    else:
+        verdict = "👎 Hold off – it likely won’t meet your 3× & 70-score threshold."
+
     return jsonify({
-        'predicted_box_office':    round(float(box_pred), 2),
-        'predicted_critic_score':  round(float(critic_pred), 2),
-        'predicted_oscar_wins':    int(oscar_pred)
+      'predicted_box_office':    round(float(box_pred),  2),
+      'predicted_critic_score':  round(float(critic_pred), 2),
+      'predicted_oscar_wins':    int(oscar_pred),
+      'verdict': verdict
     })
 
 # 5) RUN THE APP
