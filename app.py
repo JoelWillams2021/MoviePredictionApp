@@ -21,7 +21,7 @@ oscar_model  = joblib.load('data/oscar_wins_model_balanced.pkl')
 # 2) Serve index.html at “/”
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    return send_from_directory('static', 'index.html')
 
 # 3) Prediction endpoint
 @app.route('/predict', methods=['POST'])
