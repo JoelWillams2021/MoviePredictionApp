@@ -3,7 +3,9 @@
 import joblib
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
+import datetime
 from flask_cors import CORS
+
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -29,9 +31,6 @@ oscar_model  = joblib.load('data/oscar_wins_model_balanced.pkl')
 
 # Load full dataset for recommendations
 df = pd.read_csv('data/final_dataset.csv')
-
-df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
-df['release_year'] = df['release_date'].dt.year
 
 # Preprocess numeric columns for ROI
 df['budget']                = parse_money(df['budget'])
@@ -113,19 +112,23 @@ def recommend():
     if not genre:
         return jsonify({'error': 'Missing genre'}), 400
 
-    print(df['release_year'].describe())
-    current_year = pd.Timestamp.now().year
-    min_year = current_year - 15
-
-    # substring match anywhere in the original comma-list
+    # 1) Find any movie whose comma-delimited genres string contains our genre
     mask = df['genres'].str.contains(genre, case=False, na=False)
-    mask &= df['release_year'] >= min_year  # filter last 15 years
+    candidates = df[mask].copy()
 
-    candidates = df[mask]
+    # 2) Restrict to the last 15 years
+    cutoff = datetime.datetime.now().year - 15
+    candidates = candidates[
+        pd.to_numeric(candidates['year'], errors='coerce') >= cutoff
+    ]
+
     if candidates.empty:
         return jsonify([])
 
+    # 3) Pick top 3 by ROI
     top3 = candidates.sort_values('ROI', ascending=False).head(3)
+
+    # 4) Build response
     results = []
     for _, r in top3.iterrows():
         results.append({
