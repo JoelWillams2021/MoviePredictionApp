@@ -113,7 +113,7 @@ def recommend():
     if not genre:
         return jsonify({'error': 'Missing genre'}), 400
 
-    current_year = pd.Timestamp.now().year
+    current_year = 2025
     min_year = current_year - 15
 
     # substring match anywhere in the original comma-list
