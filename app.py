@@ -1,6 +1,5 @@
 # app.py
 
-import os
 import joblib
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
@@ -20,28 +19,28 @@ def parse_money(s: pd.Series) -> pd.Series:
 
 # ─── App & Model Loading ───────────────────────────────────────────────────────
 
-app = Flask(
-    __name__,
-    static_folder='static',
-    template_folder='templates'
-)
+app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
-# Load trained ML pipelines
+# Load the trained pipelines
 box_model    = joblib.load('data/box_office_model.pkl')
 critic_model = joblib.load('data/critic_score_model.pkl')
 oscar_model  = joblib.load('data/oscar_wins_model_balanced.pkl')
 
-# Load your full movie dataset for “recommend” logic
+# Load full dataset for recommendations
 df = pd.read_csv('data/final_dataset.csv')
-df['budget']                 = parse_money(df['budget'])
-df['opening_weekend_gross']  = parse_money(df['opening_weekend_gross'])
-df['gross_worldwide']        = parse_money(df['gross_worldwide'])
+
+# Preprocess numeric columns for ROI
+df['budget']                = parse_money(df['budget'])
+df['opening_weekend_gross'] = parse_money(df['opening_weekend_gross'])
+df['gross_worldwide']       = parse_money(df['gross_worldwide'])
 df = df[df['budget'] > 0].copy()
-df['ROI']                    = df['gross_worldwide'] / df['budget']
-df['primary_genre']          = df['genres'].fillna('').str.split(',', expand=True)[0].str.strip()
-df['director']               = df['directors'].fillna('').apply(lambda x: x.split(',')[0].strip())
-df['cast_list']              = df['stars'].fillna('').apply(
+df['ROI']                   = df['gross_worldwide'] / df['budget']
+
+# Extract some convenience fields
+df['primary_genre'] = df['genres'].fillna('').str.split(',', expand=True)[0].str.strip()
+df['director']      = df['directors'].fillna('').apply(lambda x: x.split(',')[0].strip())
+df['cast_list']     = df['stars'].fillna('').apply(
     lambda x: [c.strip() for c in x.strip("[]").replace("'", "").split(',')][:3]
 )
 
@@ -49,14 +48,14 @@ df['cast_list']              = df['stars'].fillna('').apply(
 
 @app.route('/')
 def index():
-    # Renders templates/index.html
     return render_template('index.html')
+
 
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
 
-    # derive month/genre if needed
+    # derive release_month & primary_genre if needed
     if 'release_date' in data and 'release_month' not in data:
         data['release_month'] = pd.to_datetime(data['release_date']).month_name()
     if 'genre' in data and 'primary_genre' not in data:
@@ -103,27 +102,31 @@ def predict():
         'verdict': verdict
     })
 
+
 @app.route('/recommend', methods=['POST'])
 def recommend():
     data = request.get_json()
-    genre = (data.get('genre') or data.get('primary_genre') or '').lower().strip()
+    genre = (data.get('genre') or data.get('primary_genre') or '').strip()
     if not genre:
         return jsonify({'error': 'Missing genre'}), 400
 
-    candidates = df[df['primary_genre'].str.lower() == genre]
+    # substring match anywhere in the original comma-list
+    mask = df['genres'].str.contains(genre, case=False, na=False)
+    candidates = df[mask]
     if candidates.empty:
         return jsonify([])
 
     top3 = candidates.sort_values('ROI', ascending=False).head(3)
-    out = []
+    results = []
     for _, r in top3.iterrows():
-        out.append({
+        results.append({
             'title':    r['title'],
             'director': r['director'],
             'cast':     r['cast_list'],
             'roi':      round(r['ROI'], 2)
         })
-    return jsonify(out)
+    return jsonify(results)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
