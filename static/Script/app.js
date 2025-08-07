@@ -60,44 +60,84 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2) Handle ROI-based recommendations
   addGenreBtn.addEventListener('click', async () => {
-    const genre = recoGenreInput.value.trim();
-    if (!genre) return;
+  const genre = recoGenreInput.value.trim();
+  if (!genre) return;
 
-    // Clear previous recommendations
-    recoList.innerHTML = '';
+  // Clear previous recommendations
+  recoList.innerHTML = '';
 
-    try {
-      const res = await fetch('/recommend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ genre }),
-      });
-      const suggestions = await res.json();
-      if (!res.ok) throw new Error(suggestions.error || 'Recommendation failed');
-      // 3) debug: make sure the array is there
-      console.log('got recommendations:', suggestions);
+  try {
+    const res = await fetch('/recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ genre }),
+    });
+    const suggestions = await res.json();
+    if (!res.ok) throw new Error(suggestions.error || 'Recommendation failed');
 
+    console.log('got recommendations:', suggestions);
 
-      // For each suggestion, render a card
-      suggestions.forEach(movie => {
-        const card = document.createElement('div');
-        card.className = 'card mb-3';
-        card.innerHTML = `
-          <div class="card-body">
-            <h5 class="card-title">${movie.title}</h5>
-            <p><strong>Ideal Director:</strong> ${movie.director}</p>
-            <p><strong>Suggested Cast:</strong> ${movie.cast.join(', ')}</p>
-          </div>
-        `;
-        recoList.appendChild(card);
-      });
-    } catch (err) {
-      const alert = document.createElement('div');
-      alert.className = 'alert alert-danger';
-      alert.textContent = `Error: ${err.message}`;
-      recoList.appendChild(alert);
-    } finally {
-      recoInput.value = '';
-    }
-  });
+    suggestions.forEach((movie, i) => {
+      // Create card with a canvas placeholder
+      const card = document.createElement('div');
+      card.className = 'card mb-4 p-3';
+      card.innerHTML = `
+        <div class="card-body">
+          <h5 class="card-title">${movie.title}</h5>
+          <p><strong>Ideal Director:</strong> ${movie.director}</p>
+          <p><strong>Suggested Cast:</strong> ${movie.cast.join(', ')}</p>
+          <canvas id="chart-${i}" style="max-width: 100%; height: 200px;"></canvas>
+        </div>
+      `;
+      recoList.appendChild(card);
+
+      // Render Budget vs Gross bar chart (in millions)
+      new Chart(
+        document.getElementById(`chart-${i}`),
+        {
+          type: 'bar',
+          data: {
+            labels: ['Budget', 'Gross'],
+            datasets: [{
+              label: '$ (M)',
+              data: [
+                movie.budget / 1e6,
+                movie.gross_worldwide / 1e6
+              ],
+              backgroundColor: [
+                'rgba(54, 162, 235, 0.5)',
+                'rgba(75, 192, 192, 0.5)'
+              ]
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: v => `$${v}M`
+                }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: ctx => `$${ctx.parsed.y.toFixed(2)}M`
+                }
+              }
+            }
+          }
+        }
+      );
+    });
+  } catch (err) {
+    const alert = document.createElement('div');
+    alert.className = 'alert alert-danger';
+    alert.textContent = `Error: ${err.message}`;
+    recoList.appendChild(alert);
+  } finally {
+    recoGenreInput.value = '';
+  }
+});
 });

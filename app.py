@@ -135,7 +135,9 @@ def recommend():
             'title':    r['title'],
             'director': r['director'],
             'cast':     r['cast_list'],
-            'roi':      round(r['ROI'], 2)
+            'roi':      round(r['ROI'], 2),
+            'budget':            float(r['budget']),
++           'gross_worldwide':   float(r['gross_worldwide'])
         })
     return jsonify(results)
 
