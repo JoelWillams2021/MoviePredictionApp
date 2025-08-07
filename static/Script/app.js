@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2) Handle ROI-based recommendations
   addGenreBtn.addEventListener('click', async () => {
-    const genre = recoInput.value.trim();
+    const genre = recoGenreInput.value.trim();
     if (!genre) return;
 
     // Clear previous recommendations
