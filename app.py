@@ -30,6 +30,9 @@ oscar_model  = joblib.load('data/oscar_wins_model_balanced.pkl')
 # Load full dataset for recommendations
 df = pd.read_csv('data/final_dataset.csv')
 
+df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
+df['release_year'] = df['release_date'].dt.year
+
 # Preprocess numeric columns for ROI
 df['budget']                = parse_money(df['budget'])
 df['opening_weekend_gross'] = parse_money(df['opening_weekend_gross'])
