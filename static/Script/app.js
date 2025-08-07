@@ -74,6 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       const suggestions = await res.json();
       if (!res.ok) throw new Error(suggestions.error || 'Recommendation failed');
+      // 3) debug: make sure the array is there
+      console.log('got recommendations:', suggestions);
+
 
       // For each suggestion, render a card
       suggestions.forEach(movie => {
