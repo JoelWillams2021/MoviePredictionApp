@@ -1,74 +1,100 @@
 // app.js
+// script/app.js
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('movieForm');
   const resultDiv = document.getElementById('predictionResult');
+  const recoInput = document.getElementById('recoGenreInput');
+  const addGenreBtn = document.getElementById('addGenreBtn');
+  const recoList = document.getElementById('recoList');
 
+  // 1) Handle prediction form submission
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    // Hide & clear previous results
     resultDiv.classList.add('d-none');
     resultDiv.innerHTML = '';
 
-    // 1) Collect all form inputs
-    const formData = new FormData(form);
-    const payload = {};
-    formData.forEach((value, key) => {
-      payload[key] = value;
-    });
+    // collect payload
+    const data = {};
+    new FormData(form).forEach((v, k) => data[k] = v);
 
-    // 2) Derive release_month from release_date if present
-    if (payload.release_date) {
-      const [year, month] = payload.release_date.split('-');
-      payload.release_month = new Date(year, month - 1)
-        .toLocaleString('default', { month: 'long' });
+    // derive release_month & primary_genre
+    if (data.release_date && !data.release_month) {
+      const [y, m] = data.release_date.split('-');
+      data.release_month = new Date(y, m - 1).toLocaleString('default', { month: 'long' });
     }
-
-    // 3) Derive primary_genre from the single genre input
-    if (payload.genre) {
-      payload.primary_genre = payload.genre.split(',')[0].trim();
+    if (data.genre && !data.primary_genre) {
+      data.primary_genre = data.genre.split(',')[0].trim();
     }
-
-    console.log('🛰️  Payload:', payload);
 
     try {
-      // 4) Send POST to your backend
-        const res = await fetch('/predict', {
+      const res = await fetch('/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(data),
       });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Prediction failed');
 
-      // 5) Parse JSON response
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || JSON.stringify(data));
-      }
-
-      console.log('✅ Prediction response:', data);
-
-      // 6) Render successful predictions
       resultDiv.innerHTML = `
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Prediction Results</h5>
-            <p><strong>Box Office:</strong> $${Number(data.predicted_box_office).toLocaleString()}</p>
-            <p><strong>Critic Score:</strong> ${Number(data.predicted_critic_score).toFixed(1)}%</p>
-            <p><strong>Oscar Wins:</strong> ${data.predicted_oscar_wins}</p>
-            <p><strong>Final Verdict</strong> ${data.verdict}</p>
+            <p><strong>Box Office:</strong> $${Number(json.predicted_box_office).toLocaleString()}</p>
+            <p><strong>Critic Score:</strong> ${Number(json.predicted_critic_score).toFixed(1)}%</p>
+            <p><strong>Oscar Wins:</strong> ${json.predicted_oscar_wins}</p>
+            <p><strong>Verdict:</strong> ${json.verdict}</p>
           </div>
         </div>
       `;
     } catch (err) {
-      console.error('❌ Error:', err);
-      // 7) Render error message
       resultDiv.innerHTML = `
         <div class="alert alert-danger" role="alert">
           <strong>Error:</strong> ${err.message}
         </div>
       `;
     } finally {
-      // 8) Show result container
       resultDiv.classList.remove('d-none');
+    }
+  });
+
+  // 2) Handle ROI-based recommendations
+  addGenreBtn.addEventListener('click', async () => {
+    const genre = recoInput.value.trim();
+    if (!genre) return;
+
+    // Clear previous recommendations
+    recoList.innerHTML = '';
+
+    try {
+      const res = await fetch('/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ genre }),
+      });
+      const suggestions = await res.json();
+      if (!res.ok) throw new Error(suggestions.error || 'Recommendation failed');
+
+      // For each suggestion, render a card
+      suggestions.forEach(movie => {
+        const card = document.createElement('div');
+        card.className = 'card mb-3';
+        card.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${movie.title}</h5>
+            <p><strong>Ideal Director:</strong> ${movie.director}</p>
+            <p><strong>Suggested Cast:</strong> ${movie.cast.join(', ')}</p>
+          </div>
+        `;
+        recoList.appendChild(card);
+      });
+    } catch (err) {
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-danger';
+      alert.textContent = `Error: ${err.message}`;
+      recoList.appendChild(alert);
+    } finally {
+      recoInput.value = '';
     }
   });
 });
