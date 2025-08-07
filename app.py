@@ -110,8 +110,13 @@ def recommend():
     if not genre:
         return jsonify({'error': 'Missing genre'}), 400
 
+    current_year = pd.Timestamp.now().year
+    min_year = current_year - 15
+
     # substring match anywhere in the original comma-list
     mask = df['genres'].str.contains(genre, case=False, na=False)
+    mask &= df['release_year'] >= min_year  # filter last 15 years
+
     candidates = df[mask]
     if candidates.empty:
         return jsonify([])
