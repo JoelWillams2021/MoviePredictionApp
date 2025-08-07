@@ -23,7 +23,11 @@ def parse_money(s: pd.Series) -> pd.Series:
 # ─── App & Model Loading ───────────────────────────────────────────────────────
 
 # Serve everything in ./static at the root URL
-app = Flask(__name__, static_folder='static', static_url_path='')
+app = Flask(
+    __name__,
+    static_folder='static',     
+    template_folder='templates'
+)
 CORS(app)
 
 # Load trained pipelines
@@ -49,7 +53,7 @@ df['ROI']                 = df['gross_worldwide'] / df['budget']
 @app.route('/')
 def index():
     # Serve index.html
-    return app.send_static_file('index.html')
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
